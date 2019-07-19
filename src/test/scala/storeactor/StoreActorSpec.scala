@@ -4,7 +4,7 @@ import akka.actor.{ActorSystem, Props}
 import akka.pattern.ask
 import akka.util.Timeout
 import org.scalatest.{Matchers, WordSpec}
-import storeactor.StoreActor.{ADDITEM, GETALL}
+import storeactor.StoreActor._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -97,6 +97,27 @@ class StoreActorSpec extends WordSpec with Matchers {
         val vec = Await.result(vecF, duration)
 
         vec.size shouldBe 1
+
+        system.stop(store)
+      }
+    }
+
+    s"when we send ignore message" should {
+      s"ignore following" in {
+        val store = system.actorOf(Props(new StoreActor[String]))
+
+        store ! IGNORE
+        store ! ADDITEM("ignored1")
+        store ! ADDITEM("ignored2")
+        store ! NORMAL
+        store ! ADDITEM("not ignored")
+
+        val vecF = (store ? GETALL).mapTo[Vector[String]]
+
+        val vec = Await.result(vecF, duration)
+
+        vec.size shouldBe 1
+        vec should contain theSameElementsInOrderAs List("not ignored")
 
         system.stop(store)
       }
