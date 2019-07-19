@@ -14,7 +14,7 @@ class ImmutableStoreActorSpec extends WordSpec with Matchers {
 
   "immutablestoreactor" when {
 
-    val system = ActorSystem("ActorSystem")
+    val system = ActorSystem("ActorSystemImmutable")
 
     val ITEMS = 100
 
@@ -24,7 +24,7 @@ class ImmutableStoreActorSpec extends WordSpec with Matchers {
 
     s"when we add $ITEMS Int items from multiple threads" should {
       s"have length of $ITEMS and all items sent to it" in {
-        val store = system.actorOf(Props(new ImmutableStoreActor[Int]),"ImmutableStoreActor")
+        val store = system.actorOf(Props(new ImmutableStoreActor[Int]),"ImmutableStoreActor1")
 
         val intlist = (1 to ITEMS).toList
 
@@ -48,7 +48,7 @@ class ImmutableStoreActorSpec extends WordSpec with Matchers {
 
     s"when we add $ITEMS strings " should {
       s"have length of $ITEMS and all items sent to it" in {
-        val store = system.actorOf(Props(new ImmutableStoreActor[String]),"ImmutableStoreActor")
+        val store = system.actorOf(Props(new ImmutableStoreActor[String]),"ImmutableStoreActor2")
 
         val stringlist = (1 to ITEMS).map(_.toString)
 
@@ -70,7 +70,7 @@ class ImmutableStoreActorSpec extends WordSpec with Matchers {
       s"be there when get GETALL" in {
         val vector=Vector(1,2,3)
 
-        val store = system.actorOf(Props(new ImmutableStoreActor(vector)),"ImmutableStoreActor")
+        val store = system.actorOf(Props(new ImmutableStoreActor(vector)),"ImmutableStoreActor3")
 
         store ! ADDITEM(4)
 
@@ -86,7 +86,7 @@ class ImmutableStoreActorSpec extends WordSpec with Matchers {
 
     s"when we send invalid messages " should {
       s"ignore them" in {
-        val store = system.actorOf(Props(new ImmutableStoreActor[String]),"ImmutableStoreActor")
+        val store = system.actorOf(Props(new ImmutableStoreActor[String]),"ImmutableStoreActor4")
 
         store ! ADDITEM("This is ok")
         store ! "this should be an ADDITEM"
@@ -104,7 +104,7 @@ class ImmutableStoreActorSpec extends WordSpec with Matchers {
 
     s"when we send ignore message" should {
       s"ignore following" in {
-        val store = system.actorOf(Props(new ImmutableStoreActor[String]),"ImmutableStoreActor")
+        val store = system.actorOf(Props(new ImmutableStoreActor[String]),"ImmutableStoreActor5")
 
         store ! ADDITEM("not ignored1")
         store ! IGNORE
