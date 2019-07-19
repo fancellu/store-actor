@@ -1,6 +1,6 @@
 package storeactor
 
-import akka.actor.Actor
+import akka.actor.{Actor, ActorLogging}
 
 import scala.reflect.ClassTag
 
@@ -16,7 +16,7 @@ object StoreActor {
 
 }
 
-class StoreActor[T: ClassTag](var vec: Vector[T] = Vector.empty[T]) extends Actor {
+class StoreActor[T: ClassTag](var vec: Vector[T] = Vector.empty[T]) extends Actor with ActorLogging {
 
   import StoreActor._
 
@@ -32,7 +32,7 @@ class StoreActor[T: ClassTag](var vec: Vector[T] = Vector.empty[T]) extends Acto
     case GETALL => sender() ! vec
     case ADDITEM(t: T) => addItem(t)
     case IGNORE => context.become(ignore, false)
-    case unknown => println(s"Was not expecting $unknown : ${unknown.getClass}")
+    case unknown => log.warning(s"Was not expecting $unknown : ${unknown.getClass}")
   }
 
   def receive: Receive = normal

@@ -24,7 +24,7 @@ class ImmutableStoreActorSpec extends WordSpec with Matchers {
 
     s"when we add $ITEMS Int items from multiple threads" should {
       s"have length of $ITEMS and all items sent to it" in {
-        val store = system.actorOf(Props(new ImmutableStoreActor[Int]))
+        val store = system.actorOf(Props(new ImmutableStoreActor[Int]),"ImmutableStoreActor")
 
         val intlist = (1 to ITEMS).toList
 
@@ -48,7 +48,7 @@ class ImmutableStoreActorSpec extends WordSpec with Matchers {
 
     s"when we add $ITEMS strings " should {
       s"have length of $ITEMS and all items sent to it" in {
-        val store = system.actorOf(Props(new ImmutableStoreActor[String]))
+        val store = system.actorOf(Props(new ImmutableStoreActor[String]),"ImmutableStoreActor")
 
         val stringlist = (1 to ITEMS).map(_.toString)
 
@@ -70,7 +70,7 @@ class ImmutableStoreActorSpec extends WordSpec with Matchers {
       s"be there when get GETALL" in {
         val vector=Vector(1,2,3)
 
-        val store = system.actorOf(Props(new ImmutableStoreActor(vector)))
+        val store = system.actorOf(Props(new ImmutableStoreActor(vector)),"ImmutableStoreActor")
 
         store ! ADDITEM(4)
 
@@ -86,7 +86,7 @@ class ImmutableStoreActorSpec extends WordSpec with Matchers {
 
     s"when we send invalid messages " should {
       s"ignore them" in {
-        val store = system.actorOf(Props(new ImmutableStoreActor[String]))
+        val store = system.actorOf(Props(new ImmutableStoreActor[String]),"ImmutableStoreActor")
 
         store ! ADDITEM("This is ok")
         store ! "this should be an ADDITEM"
@@ -104,7 +104,7 @@ class ImmutableStoreActorSpec extends WordSpec with Matchers {
 
     s"when we send ignore message" should {
       s"ignore following" in {
-        val store = system.actorOf(Props(new ImmutableStoreActor[String]))
+        val store = system.actorOf(Props(new ImmutableStoreActor[String]),"ImmutableStoreActor")
 
         store ! ADDITEM("not ignored1")
         store ! IGNORE
