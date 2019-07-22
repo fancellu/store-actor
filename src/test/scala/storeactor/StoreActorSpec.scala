@@ -2,6 +2,7 @@ package storeactor
 
 import akka.actor.{ActorSystem, Props}
 import akka.pattern.ask
+import akka.testkit.TestActorRef
 import akka.util.Timeout
 import org.scalatest.{Matchers, WordSpec}
 import storeactor.StoreActor._
@@ -14,7 +15,7 @@ class StoreActorSpec extends WordSpec with Matchers {
 
   "storeactor" when {
 
-    val system = ActorSystem("ActorSystem")
+    implicit val system = ActorSystem("ActorSystem")
 
     val ITEMS = 100
 
@@ -116,6 +117,29 @@ class StoreActorSpec extends WordSpec with Matchers {
         val vecF = (store ? GETALL).mapTo[Vector[String]]
 
         val vec = Await.result(vecF, duration)
+
+        vec.size shouldBe 2
+        vec should contain theSameElementsInOrderAs List("not ignored1", "not ignored2")
+
+        system.stop(store)
+      }
+    }
+
+    s"synchronous test: when we send ignore message" should {
+      s"ignore following" in {
+        // is invoked in calling thread, and allows deep inspection of Actor state
+        val store = TestActorRef[StoreActor[String]](Props(new StoreActor[String]))
+
+        // you could even say store.receive(ADDITEM("not ignored1"))
+
+        store ! ADDITEM("not ignored1")
+        store ! IGNORE
+        store ! ADDITEM("ignored1")
+        store ! ADDITEM("ignored2")
+        store ! NORMAL
+        store ! ADDITEM("not ignored2")
+
+        val vec = store.underlyingActor.vec
 
         vec.size shouldBe 2
         vec should contain theSameElementsInOrderAs List("not ignored1", "not ignored2")
