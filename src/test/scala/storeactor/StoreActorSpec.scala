@@ -103,8 +103,41 @@ class StoreActorSpec extends WordSpec with Matchers {
       }
     }
 
-    s"when we send ignore message" should {
-      s"ignore following" in {
+    "messages from scheduler" should {
+     "see some" in {
+       val store = system.actorOf(Props(new StoreActor[String]),"StoreActor6")
+       system.scheduler.schedule(0.milli,20.milli){
+         store ! ADDITEM("from scheduler")
+       }
+       Thread.sleep(100)
+
+       val vecF = (store ? GETALL).mapTo[Vector[String]]
+
+       val vec = Await.result(vecF, duration)
+
+       vec.size should be > 3
+     }
+    }
+
+    "cancelled messages from scheduler" should {
+      "see none" in {
+        val store = system.actorOf(Props(new StoreActor[String]),"StoreActor7")
+        val cancellable=system.scheduler.schedule(1.second,20.milli){
+          store ! ADDITEM("from scheduler")
+        }
+        Thread.sleep(100)
+        cancellable.cancel()
+
+        val vecF = (store ? GETALL).mapTo[Vector[String]]
+
+        val vec = Await.result(vecF, duration)
+
+        vec.size shouldBe 0
+      }
+    }
+
+    "when we send ignore message" should {
+      "ignore following" in {
         val store = system.actorOf(Props(new StoreActor[String]),"StoreActor5")
 
         store ! ADDITEM("not ignored1")
@@ -125,8 +158,8 @@ class StoreActorSpec extends WordSpec with Matchers {
       }
     }
 
-    s"synchronous test: when we send ignore message" should {
-      s"ignore following" in {
+    "synchronous test: when we send ignore message" should {
+      "ignore following" in {
         // is invoked in calling thread, and allows deep inspection of Actor state
         val store = TestActorRef[StoreActor[String]](Props(new StoreActor[String]))
 
